@@ -139,8 +139,8 @@ footer .fn{font-family:'Anton';text-transform:uppercase;font-size:1rem;color:var
 
 <svg width="0" height="0" style="position:absolute">
 <symbol id="crest" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="48" fill="#fff" stroke="#1a3f8f" stroke-width="4"/>
-  <circle cx="50" cy="50" r="42.5" fill="none" stroke="#1a3f8f" stroke-width="1.4"/>
+  <circle cx="50" cy="50" r="48" fill="#fff" stroke="#173a8a" stroke-width="3"/>
+  <circle cx="50" cy="50" r="41" fill="none" stroke="#d81e34" stroke-width="1"/>
   <path id="arc" d="M50 12 a38 38 0 0 1 0 76 a38 38 0 0 1 0 -76" fill="none"/>
   <text fill="#d81e34" font-family="Oswald,sans-serif" font-weight="700" font-size="9" letter-spacing="1.1">
     <textPath href="#arc" startOffset="7%">CHARLY · FUTBOL · CLUB ·</textPath>
@@ -159,6 +159,11 @@ footer .fn{font-family:'Anton';text-transform:uppercase;font-size:1rem;color:var
       <div class="kick">Charly Fútbol Club · Torneo FC26</div>
       <h1>Copa <span class="r">FC</span><span class="b">26</span></h1>
     </div>
+    <nav class="top-nav">
+      <a href="#duplas">Países</a>
+      <a href="#tabla">Tabla</a>
+      <a href="#fixture">Fixture</a>
+    </nav>
   </div>
 </header>
 
@@ -169,6 +174,41 @@ footer .fn{font-family:'Anton';text-transform:uppercase;font-size:1rem;color:var
       <h2 class="st">Países</h2>
     </div>
     <div class="duplas-grid" id="duplas-grid"></div>
+  </div>
+</section>
+
+<!-- TABLA -->
+<section class="section" id="tabla">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="st">Tabla de <span class="ac">Posiciones</span></h2>
+    </div>
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th class="left">Dupla</th>
+            <th>PJ</th><th>G</th><th>E</th><th>P</th>
+            <th class="hide">GF</th><th class="hide">GC</th><th>DIF</th><th>PTS</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span><span class="dot"></span>1° Campeón</span>
+      <span>PJ jugados · G ganados · E empatados · P perdidos · DIF dif. de gol · PTS puntos</span>
+    </div>
+  </div>
+</section>
+
+<!-- FIXTURE -->
+<section class="section" id="fixture">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="st">El <span class="ac">Fixture</span></h2>
+    </div>
+    <div id="fixture-list"></div>
   </div>
 </section>
 
@@ -229,6 +269,51 @@ document.getElementById('duplas-grid').innerHTML=PAREJAS.map(p=>{
   return `<div class="dupla">
     <div class="d-top">${fl}<div class="d-meta"><div class="d-num">Pareja ${p.id}</div>${sel}</div></div>
     ${pls}</div>`;
+}).join('');
+
+// Tabla
+function calc(){
+  const t={};PAREJAS.forEach(p=>t[p.id]={id:p.id,pj:0,g:0,e:0,p:0,gf:0,gc:0});
+  FIXTURE.forEach(f=>f.partidos.forEach(m=>{
+    if(m.gh==null||m.ga==null)return;
+    const H=t[m.h],A=t[m.a];H.pj++;A.pj++;H.gf+=m.gh;H.gc+=m.ga;A.gf+=m.ga;A.gc+=m.gh;
+    if(m.gh>m.ga){H.g++;A.p++;}else if(m.gh<m.ga){A.g++;H.p++;}else{H.e++;A.e++;}
+  }));
+  return Object.values(t).map(r=>({...r,dif:r.gf-r.gc,pts:r.g*3+r.e}))
+    .sort((a,b)=>b.pts-a.pts||b.dif-a.dif||b.gf-a.gf||a.id-b.id);
+}
+document.getElementById('tabla-body').innerHTML=calc().map((r,i)=>{
+  const p=P(r.id),s=selDe(p);
+  const fl=s?`<img class="fl" src="${flag(s.code)}">`:`<div class="fl tbd"></div>`;
+  const dif=(r.dif>0?'+':'')+r.dif;
+  return `<tr class="${i===0?'champ':''}">
+    <td class="pos">${i+1}</td>
+    <td class="left"><div class="team-cell">${fl}<div class="ti"><span class="tp">${nombre(p)}</span><span class="ts">${s?s.name:'A sortear'}</span></div></div></td>
+    <td>${r.pj}</td><td>${r.g}</td><td>${r.e}</td><td>${r.p}</td>
+    <td class="hide">${r.gf}</td><td class="hide">${r.gc}</td><td>${dif}</td><td class="pts">${r.pts}</td></tr>`;
+}).join('');
+
+// Fixture
+document.getElementById('fixture-list').innerHTML=FIXTURE.map((f,i)=>{
+  const anyPlayed=f.partidos.some(m=>m.gh!=null);
+  const ms=f.partidos.map(m=>{
+    const h=P(m.h),a=P(m.a),sh=selDe(h),sa=selDe(a);
+    const played=m.gh!=null&&m.ga!=null;
+    const score=played?`<div class="score">${m.gh} - ${m.ga}</div>`:`<div class="score pending">VS</div>`;
+    const flh=sh?`<img class="fl" src="${flag(sh.code)}">`:`<div class="fl tbd"></div>`;
+    const fla=sa?`<img class="fl" src="${flag(sa.code)}">`:`<div class="fl tbd"></div>`;
+    return `<div class="match">
+      <div class="team home">${flh}<div class="col"><span class="nm">${nombre(h)}</span><span class="sub">${sh?sh.name:'a sortear'}</span></div></div>
+      ${score}
+      <div class="team away">${fla}<div class="col"><span class="nm">${nombre(a)}</span><span class="sub">${sa?sa.name:'a sortear'}</span></div></div>
+    </div>`;
+  }).join('');
+  return `<div class="jornada ${i===0||anyPlayed?'open':''}">
+    <div class="j-head" onclick="this.parentElement.classList.toggle('open')">
+      <span class="jn">Fecha <small>${f.fecha}</small></span><span class="jd">3 partidos</span>
+      <span class="chev">▾</span>
+    </div>
+    <div class="j-body">${ms}</div></div>`;
 }).join('');
 </script>
 </body>
