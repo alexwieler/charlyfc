@@ -238,18 +238,18 @@ const SELECCIONES = [
 
 // 6 duplas. sel = índice de SELECCIONES (o null = "a sortear" hasta el día del partido).
 const PAREJAS = [
-  {id:1, jugadores:['Jugador A','Jugador B'], sel:0},
-  {id:2, jugadores:['Jugador C','Jugador D'], sel:1},
-  {id:3, jugadores:['Jugador E','Jugador F'], sel:2},
-  {id:4, jugadores:['Jugador G','Jugador H'], sel:3},
-  {id:5, jugadores:['Jugador I','Jugador J'], sel:4},
-  {id:6, jugadores:['Jugador K','Jugador L'], sel:5},
+  {id:1, jugadores:[], sel:0},
+  {id:2, jugadores:[], sel:1},
+  {id:3, jugadores:[], sel:2},
+  {id:4, jugadores:[], sel:3},
+  {id:5, jugadores:[], sel:4},
+  {id:6, jugadores:[], sel:5},
 ];
 
 // Fixture liga (6 equipos = 5 fechas x 3). gh/ga null = sin jugar.
 const FIXTURE = [
-  {fecha:1, partidos:[ {h:1,a:6,gh:2,ga:1}, {h:2,a:5,gh:0,ga:0}, {h:3,a:4,gh:3,ga:2} ]},
-  {fecha:2, partidos:[ {h:5,a:6,gh:1,ga:2}, {h:1,a:4,gh:null,ga:null}, {h:2,a:3,gh:null,ga:null} ]},
+  {fecha:1, partidos:[ {h:1,a:6,gh:null,ga:null}, {h:2,a:5,gh:null,ga:null}, {h:3,a:4,gh:null,ga:null} ]},
+  {fecha:2, partidos:[ {h:5,a:6,gh:null,ga:null}, {h:1,a:4,gh:null,ga:null}, {h:2,a:3,gh:null,ga:null} ]},
   {fecha:3, partidos:[ {h:4,a:6,gh:null,ga:null}, {h:5,a:3,gh:null,ga:null}, {h:1,a:2,gh:null,ga:null} ]},
   {fecha:4, partidos:[ {h:3,a:6,gh:null,ga:null}, {h:4,a:2,gh:null,ga:null}, {h:5,a:1,gh:null,ga:null} ]},
   {fecha:5, partidos:[ {h:2,a:6,gh:null,ga:null}, {h:3,a:1,gh:null,ga:null}, {h:4,a:5,gh:null,ga:null} ]},
@@ -258,7 +258,7 @@ const FIXTURE = [
 /* ===== RENDER (no hace falta tocar) ===== */
 const flag=c=>`https://flagcdn.com/w80/${c}.png`;
 const P=id=>PAREJAS.find(p=>p.id===id);
-const nombre=p=>'Dupla '+p.id;
+const nombre=p=>'Pareja '+p.id;
 const selDe=p=>(p.sel!=null?SELECCIONES[p.sel]:null);
 
 // Duplas
@@ -266,10 +266,12 @@ document.getElementById('duplas-grid').innerHTML=PAREJAS.map(p=>{
   const s=selDe(p);
   const fl=s?`<img class="d-flag" src="${flag(s.code)}" alt="${s.name}">`:`<div class="d-flag tbd">🎲</div>`;
   const sel=s?`<div class="d-sel">${s.name}</div>`:`<div class="d-sel tbd">A sortear</div>`;
-  const pls=p.jugadores.map(j=>`<div class="pl"><span class="av">${j.trim().charAt(0).toUpperCase()}</span>${j}</div>`).join('');
+  const pls=(p.jugadores&&p.jugadores.length)
+    ? `<div class="d-players">${p.jugadores.map(j=>`<div class="pl"><span class="av">${j.trim().charAt(0).toUpperCase()}</span>${j}</div>`).join('')}</div>`
+    : '';
   return `<div class="dupla">
-    <div class="d-top">${fl}<div class="d-meta"><div class="d-num">Dupla ${p.id}</div>${sel}</div></div>
-    <div class="d-players">${pls}</div></div>`;
+    <div class="d-top">${fl}<div class="d-meta"><div class="d-num">Pareja ${p.id}</div>${sel}</div></div>
+    ${pls}</div>`;
 }).join('');
 
 // Tabla
