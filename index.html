@@ -133,6 +133,13 @@ footer .fn{font-family:'Anton';text-transform:uppercase;font-size:1rem;color:var
   .duplas-grid{grid-template-columns:1fr}
   thead th.hide,tbody td.hide{display:none}
 }
+.cuadros-strip{display:flex;flex-wrap:wrap;gap:10px}
+.pchip{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 13px 8px 10px;box-shadow:var(--shadow)}
+.pchip img{width:30px;height:20px;border-radius:3px;object-fit:cover;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.pchip .pcn{font-family:'Oswald';font-weight:600;text-transform:uppercase;letter-spacing:.03em;font-size:.9rem;line-height:1.1}
+.pchip .pcs{font-size:.68rem;color:var(--win);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.pchip.taken{opacity:.55}
+.pchip.taken .pcs{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -153,6 +160,14 @@ footer .fn{font-family:'Anton';text-transform:uppercase;font-size:1rem;color:var
     </nav>
   </div>
 </header>
+
+<!-- CUADROS -->
+<section class="section" id="cuadros" style="padding-bottom:6px">
+  <div class="wrap">
+    <div class="sec-head"><h2 class="st">Países <span class="ac">en juego</span></h2></div>
+    <div class="cuadros-strip" id="cuadros-strip"></div>
+  </div>
+</section>
 
 <!-- DUPLAS -->
 <section class="section" id="duplas">
@@ -256,6 +271,12 @@ document.getElementById('duplas-grid').innerHTML=PAREJAS.map(p=>{
   return `<div class="dupla">
     <div class="d-top">${fl}<div class="d-meta"><div class="d-num">Pareja ${p.id}</div>${sel}</div></div>
     ${pls}</div>`;
+}).join('');
+
+// Países en juego
+document.getElementById('cuadros-strip').innerHTML=SELECCIONES.map((s,i)=>{
+  const taken=PAREJAS.find(p=>p.sel===i);
+  return `<div class="pchip ${taken?'taken':''}"><img src="${flag(s.code)}" alt="${s.name}"><div><div class="pcn">${s.name}</div><div class="pcs">${taken?('Tomado · '+nombre(taken)):'Disponible'}</div></div></div>`;
 }).join('');
 
 // Tabla
